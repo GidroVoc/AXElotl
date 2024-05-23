@@ -9,7 +9,6 @@ public class PlayerHealth : MonoBehaviour
     private int currentLives;
     public int MaxLives = 3;
     public float invincibilityTime = 2f; // ¬рем€ неу€звимости в секундах
-    private float invincibilityTimer = 0f; // “аймер дл€ отслеживани€ времени неу€звимости
     private bool isInvincible = false; // ‘лаг, указывающий, находитс€ ли персонаж в состо€нии неу€звимости
     public TextMeshProUGUI livesText;
 
@@ -22,70 +21,64 @@ public class PlayerHealth : MonoBehaviour
 
     void FixedUpdate()
     {
-        CheckInvincible();
+
     }
     // Update is called once per frame
     void Update()
     {
-        CheckIfCharacterFellIntoAbyss();   
+        CheckIfCharacterFellIntoAbyss();
     }
 
     public void TakeDamage(int damage)
     {
-        currentLives -= damage;
-        UpdateLivesText();
-        if (currentLives <= 0)
+        if (!isInvincible)
         {
-            // «десь можно добавить логику смерти персонажа
-            RestartLevel();
+            currentLives -= damage;
+            UpdateLivesText();
+            if (currentLives <= 0)
+            {
+                // «десь можно добавить логику смерти персонажа
+                RestartLevel();
+            }
+            else
+            {
+                StartCoroutine(Invincibility());
+            }
         }
     }
 
     void UpdateLivesText()
     {
-        livesText.text = "∆изни: " + currentLives; // ќбновите текст, чтобы он отображал текущее количество жизней
+        livesText.text = " " + currentLives; // ќбновите текст, чтобы он отображал текущее количество жизней
     }
 
-    public void CheckInvincible()
+    IEnumerator Invincibility()
     {
-        if (isInvincible)
-        {
-            invincibilityTimer -= Time.deltaTime;
-            Debug.Log("проверил");
-            if (invincibilityTimer <= 0)
-            {
-                isInvincible = false;
-            }
-        }
+        isInvincible = true;
+        yield return new WaitForSeconds(invincibilityTime);
+        isInvincible = false;
     }
-     
+
     void CheckIfCharacterFellIntoAbyss()
     {
         if (transform.position.y < -10) // «амените -10 на уровень, который вы определ€ете как "бездну"
-        {
             TakeDamage(currentLives); // ”меньшает жизни персонажа до нул€
-        }
     }
 
-   
+
     void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("DamageObject") && !isInvincible)
+        if (collision.gameObject.CompareTag("DamageObject") && collision.gameObject.tag != "DamageArea")
         {
             TakeDamage(1); // Ќаносит 1 единицу урона при столкновении
-            isInvincible = true; // ѕереводит персонажа в состо€ние неу€звимости
-            invincibilityTimer = invincibilityTime; // —брос таймера неу€звимости
-            Debug.Log("уров");
         }
     }
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        if (collider.gameObject.CompareTag("DamageObject") && !isInvincible)
+        if (collider.gameObject.CompareTag("DamageObject") && collider.gameObject.tag != "DamageArea")
         {
             TakeDamage(1); // Ќаносит 1 единицу урона при столкновении
-            isInvincible = true; // ѕереводит персонажа в состо€ние неу€звимости
-            invincibilityTimer = invincibilityTime; // —брос таймера неу€звимости
         }
     }
 

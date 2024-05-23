@@ -5,15 +5,16 @@ TagManager:
   serializedVersion: 2
   tags:
   - DamageObject
+  - DamageArea
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Character
   - Water
   - UI
-  - Ground
-  - wallLayer
+  - groundLayer
+  - Platform
   - 
   - 
   - 

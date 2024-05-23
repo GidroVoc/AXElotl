@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -6,7 +7,9 @@ public class PlayerController : MonoBehaviour
     public float JumpForce = 2f;
     public float DashDistance = 5f;
     public float JumpHoldTime = 0.2f;
+    public float DashCooldown = 2f; // Время задержки для dash в секундах
 
+    private float lastDashTime; // Время последнего использования dash
     private bool facingRight = true;
     private float move;
     private bool isGrounded;
@@ -22,6 +25,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        lastDashTime = Time.time - DashCooldown; // Инициализируем так, чтобы dash был доступен сразу при старте
     }
 
     void FixedUpdate()
@@ -35,6 +39,7 @@ public class PlayerController : MonoBehaviour
         CheckIfCharacterIsGrounded();
         PerformDash();
         PerformJump();
+        Drop();
     }
 
     void FlipCharacter()
@@ -56,7 +61,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckIfCharacterIsGrounded()
     {
-        isGrounded = Physics2D.OverlapCircle(groundCheck.transform.position, GroundCheckRadius, groundLayer);
+        isGrounded = Physics2D.OverlapCircle(groundCheck.transform.position, GroundCheckRadius, groundLayer | 1 << LayerMask.NameToLayer("Platform"));
     }
 
     void PerformJump()
@@ -106,10 +111,33 @@ public class PlayerController : MonoBehaviour
 
     void PerformDash()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time >= lastDashTime + DashCooldown)
         {
-            Vector3 dashPosition = transform.position + (facingRight ? Vector3.right : Vector3.left) * DashDistance;
-            rb.MovePosition(dashPosition);
+            StartCoroutine(Dash());
         }
+    }
+
+    IEnumerator Dash()
+    {
+        Vector3 dashPosition = transform.position + (facingRight ? Vector3.right : Vector3.left) * DashDistance;
+        rb.MovePosition(dashPosition);
+        lastDashTime = Time.time; // Обновляем время последнего использования dash
+        yield return new WaitForSeconds(DashCooldown); // Ждем время задержки перед следующим использованием dash
+    }
+
+    void Drop()
+    {
+        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+            StartCoroutine(DropThroughPlatform());
+    }
+
+    IEnumerator DropThroughPlatform()
+    {
+        Debug.Log("DropThroughPlatform called");
+        // Игнорировать столкновения между персонажем и платформами
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platform"), true);
+        yield return new WaitForSeconds(0.2f); // Время, в течение которого персонаж может проходить сквозь платформы
+                                               // Включить столкновения между персонажем и платформами
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platform"), false);
     }
 }

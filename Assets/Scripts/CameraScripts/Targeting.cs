@@ -1,25 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class newcam : MonoBehaviour
+public class CameraFollow : MonoBehaviour
 {
-	public float dampTime = 0.15f;
-	private Vector3 velocity = Vector3.zero;
-	public Transform target;
+    public Transform player; // ссылка на игрока
+    public Vector3 offset; // смещение камеры относительно игрока
+    public float dampTime = 0.15f; // время затухания
+    private Vector3 velocity = Vector3.zero; // скорость
 
-	// Update is called once per frame
-	void FixedUpdate()
-	{
-		if (target)
-		{
-			Vector3 point = GetComponent<Camera>().WorldToViewportPoint(new Vector3(target.position.x, target.position.y + 0.75f, target.position.z));
-			Vector3 delta = new Vector3(target.position.x, target.position.y + 0.75f, target.position.z) - GetComponent<Camera>().ViewportToWorldPoint(new Vector3(0.5f, 0.5f, point.z)); //(new Vector3(0.5, 0.5, point.z));
-			Vector3 destination = transform.position + delta;
+    void Update()
+    {
+        if (player)
+        {
+            // Целевая позиция камеры
+            Vector3 targetPosition = new Vector3(player.position.x + offset.x, player.position.y + offset.y, offset.z);
 
-
-			transform.position = Vector3.SmoothDamp(transform.position, destination, ref velocity, dampTime);
-		}
-
-	}
+            // Плавное перемещение камеры к целевой позиции
+            transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, dampTime);
+        }
+    }
 }
