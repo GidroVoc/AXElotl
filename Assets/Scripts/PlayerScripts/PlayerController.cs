@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -6,35 +7,48 @@ public class PlayerController : MonoBehaviour
     public float JumpForce = 2f;
     public float DashDistance = 5f;
     public float JumpHoldTime = 0.2f;
+    public float DashCooldown = 2f; // Время задержки для dash в секундах
 
+    private float lastDashTime; // Время последнего использования dash
     private bool facingRight = true;
     private float move;
     private bool isGrounded;
     private float jumpHoldTimer;
-    [SerializeField]
-    private GameObject groundCheck;
-    [SerializeField]
-    private LayerMask groundLayer;
+    [SerializeField] private GameObject groundCheck;
+    [SerializeField] private LayerMask groundLayer;
     private Rigidbody2D rb;
+    private BoxCollider2D boxCollider;
     private bool isJumping;
     private const float GroundCheckRadius = 0.02f;
 
-    void Start()
+    private Animator anim;
+
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        boxCollider = GetComponent<BoxCollider2D>();
+        anim = GetComponent<Animator>();
     }
 
-    void FixedUpdate()
+    private void Start()
+    {
+        lastDashTime = Time.time - DashCooldown; // Инициализируем так, чтобы dash был доступен сразу при старте
+    }
+
+    private void FixedUpdate()
     {
         MoveCharacter();
     }
 
-    void Update()
+    private void Update()
     {
         move = Input.GetAxis("Horizontal");
         CheckIfCharacterIsGrounded();
         PerformDash();
         PerformJump();
+        Drop();
+        anim.SetBool("run", move != 0);
+        anim.SetBool("grounded", isGrounded);
     }
 
     void FlipCharacter()
@@ -56,7 +70,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckIfCharacterIsGrounded()
     {
-        isGrounded = Physics2D.OverlapCircle(groundCheck.transform.position, GroundCheckRadius, groundLayer);
+        isGrounded = Physics2D.OverlapCircle(groundCheck.transform.position, GroundCheckRadius, groundLayer | 1 << LayerMask.NameToLayer("Platform"));
     }
 
     void PerformJump()
@@ -106,10 +120,38 @@ public class PlayerController : MonoBehaviour
 
     void PerformDash()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+       // Debug.Log("Space pr");
+        Vector3 end = transform.position + (facingRight ? Vector3.right : Vector3.left) * DashDistance;
+        RaycastHit2D canDash = Physics2D.Linecast(boxCollider.bounds.center, end, groundLayer);
+        if (canDash.collider == null && Input.GetKeyDown(KeyCode.Space) && Time.time >= lastDashTime + DashCooldown)
         {
-            Vector3 dashPosition = transform.position + (facingRight ? Vector3.right : Vector3.left) * DashDistance;
-            rb.MovePosition(dashPosition);
+            //Debug.Log("Dash");
+            anim.Play("Dash");
+            StartCoroutine(Dash());
         }
+    }
+
+    IEnumerator Dash()
+    {
+        Vector3 dashPosition = transform.position + (facingRight ? Vector3.right : Vector3.left) * DashDistance;
+        rb.MovePosition(dashPosition);
+        lastDashTime = Time.time; // Обновляем время последнего использования dash
+        yield return new WaitForSeconds(DashCooldown); // Ждем время задержки перед следующим использованием dash
+    }
+
+
+    void Drop()
+    {
+        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+            StartCoroutine(DropThroughPlatform());
+    }
+
+    IEnumerator DropThroughPlatform()
+    {
+        // Игнорировать столкновения между персонажем и платформами
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platform"), true);
+        yield return new WaitForSeconds(0.2f); // Время, в течение которого персонаж может проходить сквозь платформы
+                                               // Включить столкновения между персонажем и платформами
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platform"), false);
     }
 }
