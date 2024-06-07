@@ -34,7 +34,6 @@ public class EnemyHealth : MonoBehaviour
             {
                 anim.SetTrigger("die");
 
-                //Deactivate all attached component classes
                 foreach (Behaviour component in components)
                     component.enabled = false;
 

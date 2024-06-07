@@ -9,7 +9,6 @@ public class Restart : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            Debug.Log("R peresed");
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }    
     }

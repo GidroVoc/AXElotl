@@ -7,9 +7,9 @@ public class PlayerController : MonoBehaviour
     public float JumpForce = 2f;
     public float DashDistance = 5f;
     public float JumpHoldTime = 0.2f;
-    public float DashCooldown = 2f; // Время задержки для dash в секундах
+    public float DashCooldown = 2f; 
 
-    private float lastDashTime; // Время последнего использования dash
+    private float lastDashTime; 
     private bool facingRight = true;
     private float move;
     private bool isGrounded;
@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        lastDashTime = Time.time - DashCooldown; // Инициализируем так, чтобы dash был доступен сразу при старте
+        lastDashTime = Time.time - DashCooldown; 
     }
 
     private void FixedUpdate()
@@ -120,12 +120,10 @@ public class PlayerController : MonoBehaviour
 
     void PerformDash()
     {
-       // Debug.Log("Space pr");
         Vector3 end = transform.position + (facingRight ? Vector3.right : Vector3.left) * DashDistance;
         RaycastHit2D canDash = Physics2D.Linecast(boxCollider.bounds.center, end, groundLayer);
         if (canDash.collider == null && Input.GetKeyDown(KeyCode.Space) && Time.time >= lastDashTime + DashCooldown)
         {
-            //Debug.Log("Dash");
             anim.Play("Dash");
             StartCoroutine(Dash());
         }
@@ -135,8 +133,8 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 dashPosition = transform.position + (facingRight ? Vector3.right : Vector3.left) * DashDistance;
         rb.MovePosition(dashPosition);
-        lastDashTime = Time.time; // Обновляем время последнего использования dash
-        yield return new WaitForSeconds(DashCooldown); // Ждем время задержки перед следующим использованием dash
+        lastDashTime = Time.time; 
+        yield return new WaitForSeconds(DashCooldown);
     }
 
 
@@ -148,10 +146,8 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator DropThroughPlatform()
     {
-        // Игнорировать столкновения между персонажем и платформами
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platform"), true);
-        yield return new WaitForSeconds(0.2f); // Время, в течение которого персонаж может проходить сквозь платформы
-                                               // Включить столкновения между персонажем и платформами
+        yield return new WaitForSeconds(0.2f); 
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platform"), false);
     }
 }

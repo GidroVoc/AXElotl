@@ -8,8 +8,8 @@ public class PlayerHealth : MonoBehaviour
 { 
     public float currentLives { get; private set; }
     public int MaxLives = 3;
-    public float invincibilityTime = 2f; // Время неуязвимости в секундах
-    private bool isInvincible = false; // Флаг, указывающий, находится ли персонаж в состоянии неуязвимости
+    public float invincibilityTime = 2f; 
+    private bool isInvincible = false; 
     public TextMeshProUGUI livesText;
 
     private Animator anim;
@@ -20,7 +20,6 @@ public class PlayerHealth : MonoBehaviour
         currentLives = MaxLives;
     }
 
-    // Update is called once per frame
     void Update()
     {
         CheckIfCharacterFellIntoAbyss();
@@ -46,7 +45,7 @@ public class PlayerHealth : MonoBehaviour
 
     void UpdateLivesText()
     {
-        livesText.text = " " + currentLives; // Обновите текст, чтобы он отображал текущее количество жизней
+        livesText.text = " " + currentLives; 
     }
 
     public void AddHealth(float _value)
@@ -64,13 +63,12 @@ public class PlayerHealth : MonoBehaviour
 
     void CheckIfCharacterFellIntoAbyss()
     {
-        if (transform.position.y < -6) // Замените -10 на уровень, который вы определяете как "бездну"
-            RestartLevel(); // Уменьшает жизни персонажа до нуля
+        if (transform.position.y < -6) 
+            RestartLevel(); 
     }
 
     void RestartLevel()
     {
-        // Загрузка текущего уровня заново
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

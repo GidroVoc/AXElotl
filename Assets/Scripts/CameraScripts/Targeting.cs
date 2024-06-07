@@ -11,10 +11,10 @@ public class CameraFollow : MonoBehaviour
     {
         if (player)
         {
-            // Целевая позиция камеры
+            // позиция камеры
             Vector3 targetPosition = new Vector3(player.position.x + offset.x, player.position.y + offset.y, offset.z);
 
-            // Плавное перемещение камеры к целевой позиции
+            // плавное перемещение камеры к целевой позиции
             transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, dampTime);
         }
     }
