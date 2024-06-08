@@ -46,4 +46,26 @@ public class EnemyHealth : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    void ActivateEnemiesCounter()
+    {
+        GameObject playerObject = GameObject.Find("Player");
+        if (playerObject != null)
+        {
+            CounterEnemies counter = playerObject.GetComponent<CounterEnemies>();
+            if (counter != null)
+            {
+                counter.UpdateEnemiesCounter();
+            }
+            else
+            {
+                Debug.LogError("CounterEnemies component not found on the Player object");
+            }
+        }
+        else
+        {
+            Debug.LogError("Player object not found in the scene");
+        }
+    }
+
 }
