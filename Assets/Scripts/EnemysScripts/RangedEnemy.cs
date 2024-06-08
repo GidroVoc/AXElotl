@@ -19,7 +19,6 @@ public class RangedEnemy : MonoBehaviour
     [SerializeField] private LayerMask playerLayer;
     private float cooldownTimer = Mathf.Infinity;
 
-    //References
     private Animator anim;
     private EnemyPatrol enemyPatrol;
 
@@ -33,7 +32,6 @@ public class RangedEnemy : MonoBehaviour
     {
         cooldownTimer += Time.deltaTime;
 
-        //Attack only when player in sight?
         if (PlayerInSight())
         {
             if (cooldownTimer >= attackCooldown)
